@@ -3,3 +3,7 @@
 ################################################################################
 
 /packages
+/.vs/UpdateMe.App/v14
+/UpdateMe.App/obj/Debug
+/UpdateMe.App/bin/Debug
+/UpdateMe.App/.vs/UpdateMe.App/v14

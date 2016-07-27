@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <StartArguments>-appId=TestA -version=1.2.4 -authors=jp -s="C:\Users\jp\Documents\Visual Studio 2015\Projects\TestSquirrel\TestSquirrel\bin\Release"  -signCertPass=fyxp5pbYhfR9Mp3zeXDFQRmg -signCertPath="C:\Users\jp\Desktop\IntrensicCodeSign.pfx" -distPath="intrensicapp/Squirrel" -t=TestA</StartArguments>
+  </PropertyGroup>
+</Project>
