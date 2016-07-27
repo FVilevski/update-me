@@ -13,7 +13,7 @@ namespace UpdateMe.App
     public class UpdateBuilder
     {
         private const string DIRECTORY_BASE = "/lib/net45";
-        private const string SQUIRREL_PATH = @"tools\Squirrel.exe";
+        private readonly string SQUIRREL_PATH =  Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().Location), "tools", "Squirrel.exe");
         private readonly string[] FILES_EXCLUDE_LIST = { ".pdb", ".vshost" };
 
         private IDistributor _distributor;
@@ -27,11 +27,17 @@ namespace UpdateMe.App
             _distributor = distributor;
         }
 
-        public void ReleaseNewVersion(RelaseRequest request)
+        public ResultCodeEnum ReleaseNewVersion(RelaseRequest request)
         {
             if (request == null || request.Validate() == false)
             {
-                return;
+                return ResultCodeEnum.ERROR_INPUT;
+            }
+
+            if (File.Exists(SQUIRREL_PATH) == false)
+            {
+                $"Squirrel is not found path: {SQUIRREL_PATH}".WriteErrorToConsole();
+                return ResultCodeEnum.ERROR_INPUT;
             }
 
             CreateNugetPackage(request);
@@ -39,10 +45,10 @@ namespace UpdateMe.App
             if (SquirrelReleasify(request))
             {
                 DistributeFiles(request);
-
                 $"Application version {request.Version} has been releasead".WriteSuccessToConsole();
+                return ResultCodeEnum.SUCCESS;
             }
-
+            return ResultCodeEnum.ERROR_UNEXPECTED;
         }
 
         private void CreateNugetPackage(RelaseRequest request)
@@ -111,12 +117,12 @@ namespace UpdateMe.App
                 exeProcess.WaitForExit();
                 if (exeProcess.ExitCode == -1)
                 {
-                    "Squirrel failed please check error log".WriteErrorToConsole();
+                    "Creating release packages failed please check error log".WriteErrorToConsole();
                     isSuccess = false;
                 }
                 else
                 {
-                    "Squirrel installation files created".WriteSuccessToConsole();
+                    "Creating release packages success".WriteSuccessToConsole();
                     isSuccess = true;
                 }
 
@@ -166,6 +172,7 @@ namespace UpdateMe.App
             Console.WriteLine(message);
             Console.ForegroundColor = ConsoleColor.Gray;
         }
+
     }
 
 

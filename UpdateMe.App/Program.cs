@@ -18,26 +18,28 @@ namespace UpdateMe.App
             {
                 ParseArguments(args);
 
-                IDistributor distributor = GetDistributor(_distributionPath);
-                if (distributor == null)
-                {
-                    Environment.Exit(Utils.EXIT_CODE_ERROR_UNEXPECTED);
-                    return;
-                }
                 if (!request.Validate(true))
                 {
-                    Environment.Exit(Utils.EXIT_CODE_ERROR_INPUT);
+                    Environment.Exit(ResultCodeEnum.ERROR_INPUT.Value());
                     return;
                 }
 
+                IDistributor distributor = GetDistributor(_distributionPath);
+                if (distributor == null)
+                {
+                    Environment.Exit(ResultCodeEnum.ERROR_UNEXPECTED.Value());
+                    return;
+                }
+
+
                 UpdateBuilder updateBuilder = new UpdateBuilder(distributor);
-                updateBuilder.ReleaseNewVersion(request);
-                Environment.Exit(Utils.EXIT_CODE_SUCCESS);
+                ResultCodeEnum resultCode = updateBuilder.ReleaseNewVersion(request);
+                Environment.Exit(resultCode.Value());
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 ex.Message.WriteErrorToConsole();
-                Environment.Exit(Utils.EXIT_CODE_ERROR_UNEXPECTED);
+                Environment.Exit(ResultCodeEnum.ERROR_UNEXPECTED.Value());
                 //todo log exception
             }
 
@@ -49,7 +51,7 @@ namespace UpdateMe.App
             if (string.IsNullOrEmpty(distributionPath))
             {
                 "Amazon bucket has to be provided".WriteErrorToConsole();
-                Environment.Exit(Utils.EXIT_CODE_ERROR_INPUT);
+                Environment.Exit(ResultCodeEnum.ERROR_INPUT.Value());
                 return distributor;
             }
 
@@ -57,7 +59,7 @@ namespace UpdateMe.App
             if (string.IsNullOrWhiteSpace(region))
             {
                 $"{AmazonDistributor.AWS_REGION} enviroment variable has to set".WriteErrorToConsole();
-                Environment.Exit(Utils.EXIT_CODE_ERROR_INPUT);
+                Environment.Exit(ResultCodeEnum.ERROR_INPUT.Value());
                 return distributor;
             }
 
@@ -65,7 +67,7 @@ namespace UpdateMe.App
             if (string.IsNullOrWhiteSpace(awsKey))
             {
                 $"{Amazon.Runtime.EnvironmentVariablesAWSCredentials.ENVIRONMENT_VARIABLE_ACCESSKEY} enviroment variable has to set".WriteErrorToConsole();
-                Environment.Exit(Utils.EXIT_CODE_ERROR_INPUT);
+                Environment.Exit(ResultCodeEnum.ERROR_INPUT.Value());
                 return distributor;
             }
 
@@ -73,7 +75,7 @@ namespace UpdateMe.App
             if (string.IsNullOrWhiteSpace(awsSecret))
             {
                 $"{Amazon.Runtime.EnvironmentVariablesAWSCredentials.ENVIRONMENT_VARIABLE_SECRETKEY} enviroment variable has to set".WriteErrorToConsole();
-                Environment.Exit(Utils.EXIT_CODE_ERROR_INPUT);
+                Environment.Exit(ResultCodeEnum.ERROR_INPUT.Value());
                 return distributor;
             }
 
@@ -86,7 +88,8 @@ namespace UpdateMe.App
 
         private static void ParseArguments(string[] args)
         {
-            OptionSet p = new OptionSet()
+            bool show_help = false;
+            OptionSet options = new OptionSet()
             {
                  {
                     "v|version=",
@@ -129,21 +132,37 @@ namespace UpdateMe.App
                     "Aws bucket path to with the publish should be send",
                     i => { _distributionPath = i; }
                 },
+                     { "h|help",  "show this message and exit",
+              v => show_help = v != null },
 
 
                };
 
             try
             {
-                List<string> extra = p.Parse(args);
+                List<string> extra = options.Parse(args);
             }
             catch (OptionException e)
             {
-                Console.Write("greet: ");
+                Console.Write("uploadme: ");
                 Console.WriteLine(e.Message);
-                Console.WriteLine("Try `greet --help' for more information.");
+                Console.WriteLine("Try `uploadme --help' for more information.");
+                Environment.Exit(ResultCodeEnum.ERROR_INPUT.Value());
+            }
+            if (show_help)
+            {
+                ShowHelp(options);
             }
 
+        }
+
+        static void ShowHelp(OptionSet p)
+        {
+            Console.WriteLine("Usage: uploadme [OPTIONS]+ message");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            p.WriteOptionDescriptions(Console.Out);
+            Environment.Exit(ResultCodeEnum.SUCCESS_HELP.Value());
         }
     }
 }

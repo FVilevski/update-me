@@ -33,5 +33,10 @@ namespace UpdateMe.App
             Console.Write($" {progress}%");
             Console.SetCursorPosition(currentPosition, Console.CursorTop);
         }
+
+        public static int Value(this ResultCodeEnum code)
+        {
+            return (int)code;
+        }
     }
 }
