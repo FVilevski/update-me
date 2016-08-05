@@ -9,3 +9,6 @@
 /UpdateMe.App/.vs/UpdateMe.App/v14
 /UpdateMe.App/bin/Release
 /UpdateMe.App/obj/Release
+/UpdateMe.Updater/bin/Release
+/UpdateMe.Updater/obj/Release
+/UpdateMe.Updater/UpdateMe.Updater.csproj.user
