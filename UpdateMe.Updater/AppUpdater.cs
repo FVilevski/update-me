@@ -29,7 +29,7 @@ namespace UpdateMe.Updater
             _updateManager = updateManager;
         }
 
-        public async Task<bool> HasNewUpdate()
+        public async Task<bool> HasNewUpdateAsync()
         {
             bool hasUpdate = false;
             try
@@ -44,24 +44,51 @@ namespace UpdateMe.Updater
                 System.Diagnostics.Trace.WriteLine($"HasNewUpdate failed with web expetion {ex.Message}");
                 hasUpdate = false;
             }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"HasNewUpdate failed with unexpected error {ex.Message}");
+                hasUpdate = false;
+            }
             return hasUpdate;
         }
 
-        public async Task UpdateApp(Action<int> progress = null)
+        public async Task<bool> UpdateAppAsync(bool restartAfterUpdate = true, Action<int> progress = null)
         {
+            bool hasUpdated = false;
             try
             {
-                if (await this.HasNewUpdate())
+                if (await this.HasNewUpdateAsync())
                 {
                     ReleaseEntry info = await _updateManager.UpdateApp(progress);
-                    _updateManager.Dispose();
-                    UpdateManager.RestartApp();
+                    hasUpdated = true;
+                    if (restartAfterUpdate)
+                    {
+                        RestartApplication();
+                    }
                 }
             }
             catch (System.Net.WebException ex)
             {
                 System.Diagnostics.Trace.WriteLine($"UpdateApp failed with web expetion {ex.Message}");
+                hasUpdated = false;
             }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"UpdateApp failed with unexpected error {ex.Message}");
+                hasUpdated = false;
+            }
+            return hasUpdated;
+        }
+
+        public void RestartApplication()
+        {
+            UpdateManager.RestartApp();
+            this.Dispose();
+        }
+
+        public void Dispose()
+        {
+            _updateManager.Dispose();
         }
     }
 }
