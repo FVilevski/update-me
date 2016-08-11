@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -84,6 +85,16 @@ namespace UpdateMe.Updater
         {
             UpdateManager.RestartApp();
             this.Dispose();
+        }
+
+        public void SetRunOnWindowsStartup()
+        {
+            _updateManager.CreateShortcutsForExecutable(
+                Assembly.GetEntryAssembly().Location,
+                ShortcutLocation.Startup,
+                Environment.CommandLine.Contains("squirrel-install") == false,
+                null,
+                null);
         }
 
         public void Dispose()
