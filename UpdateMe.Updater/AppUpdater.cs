@@ -87,13 +87,13 @@ namespace UpdateMe.Updater
             this.Dispose();
         }
 
-        public void SetRunOnWindowsStartup()
+        public void SetRunOnWindowsStartup(string arguments = null)
         {
             _updateManager.CreateShortcutsForExecutable(
                 Assembly.GetEntryAssembly().Location,
                 ShortcutLocation.Startup,
-                Environment.CommandLine.Contains("squirrel-install") == false,
-                null,
+                false,
+                arguments,
                 null);
         }
 

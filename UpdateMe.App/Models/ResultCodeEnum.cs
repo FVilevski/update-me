@@ -14,5 +14,6 @@ namespace UpdateMe.App
         ERROR_INPUT = -10,
         ERROR_PECONDITION = -11,
         ERROR_UNEXPECTED = -12,
+        ERROR_GET_VERSION = -13,
     }
 }

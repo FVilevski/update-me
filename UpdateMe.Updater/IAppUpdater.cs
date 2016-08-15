@@ -28,7 +28,7 @@ namespace UpdateMe.Updater
         /// <returns>true if appliocation is updated, false if something went wrong</returns>
         Task<bool> UpdateAppAsync(bool restartAfterUpdate = true, Action<int> progress = null);
 
-        void SetRunOnWindowsStartup();
+        void SetRunOnWindowsStartup(string arguments = null);
 
         /// <summary>
         /// Closes current application and starts the newest version

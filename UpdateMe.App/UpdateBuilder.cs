@@ -13,8 +13,8 @@ namespace UpdateMe.App
     public class UpdateBuilder
     {
         private const string DIRECTORY_BASE = "/lib/net45";
-        private readonly string SQUIRREL_PATH =  Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().Location), "tools", "Squirrel.exe");
-        private readonly string[] FILES_EXCLUDE_LIST = { ".pdb", ".vshost" };
+        private readonly string SQUIRREL_PATH = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().Location), "tools", "Squirrel.exe");
+
 
         private IDistributor _distributor;
         public UpdateBuilder(IDistributor distributor)
@@ -38,6 +38,11 @@ namespace UpdateMe.App
             {
                 $"Squirrel is not found path: {SQUIRREL_PATH}".WriteErrorToConsole();
                 return ResultCodeEnum.ERROR_INPUT;
+            }
+
+            if (!TryGetPreviousVersion(request))
+            {
+                return ResultCodeEnum.ERROR_GET_VERSION;
             }
 
             CreateNugetPackage(request);
@@ -134,9 +139,9 @@ namespace UpdateMe.App
         {
             List<string> filesToDistribute = new List<string>
             {
-                Path.Combine(request.ReleasePath,"RELEASES"),
-                Path.Combine(request.ReleasePath,"Setup.exe"),
-                Path.Combine(request.ReleasePath,"Setup.msi"),
+                Path.Combine(request.ReleasePath, Extensions.RELEASE_INFO_FILENAME),
+                Path.Combine(request.ReleasePath,Extensions.SETUP_EXE_FILENAME),
+                Path.Combine(request.ReleasePath,Extensions.SETUP_MSI_FILENAME),
                 Path.Combine(request.ReleasePath,$"{request.AppId}-{request.Version}-full.nupkg"),
             };
             string deltaFile = Path.Combine(request.ReleasePath, $"{request.AppId}-{request.Version}-delta.nupkg");
@@ -155,7 +160,7 @@ namespace UpdateMe.App
                 AddDirectoryFilesToPath(directoryPath, files, false);
             }
 
-            foreach (string filePath in Directory.GetFiles(directory).Where(c => FILES_EXCLUDE_LIST.Contains(Path.GetExtension(c)) == false))
+            foreach (string filePath in directory.GetDirectoryFiles())
             {
                 files.Add(new ManifestFile()
                 {
@@ -164,6 +169,38 @@ namespace UpdateMe.App
                                                      Path.Combine(DIRECTORY_BASE, Path.GetFileName(directory), Path.GetFileName(filePath))
                 });
             }
+        }
+
+        private bool TryGetPreviousVersion(RelaseRequest request)
+        {
+            bool result = true;
+            if (Directory.Exists(request.ReleasePath))
+            {
+                Directory.Delete(request.ReleasePath, true);
+            }
+            Directory.CreateDirectory(request.ReleasePath);
+            if (_distributor.FileExists(Extensions.RELEASE_INFO_FILENAME))
+            {
+                "Previous version detected, getting new version...".WriteInfoToConsole();
+                string releaseFile = Path.Combine(request.ReleasePath, Extensions.RELEASE_INFO_FILENAME);
+                _distributor.DownloadFile(Extensions.RELEASE_INFO_FILENAME, Path.Combine(request.ReleasePath, Extensions.RELEASE_INFO_FILENAME));
+                var lastVersionFile = File.ReadAllLines(releaseFile).Select(c => c.Split(' ')[1].Trim()).LastOrDefault(c => c.StartsWith(request.AppId));
+                if (_distributor.FileExists(lastVersionFile))
+                {
+                    _distributor.DownloadFile(lastVersionFile, Path.Combine(request.ReleasePath, lastVersionFile));
+                    "Previous version downloaded".WriteSuccessToConsole();
+                }
+                else
+                {
+                    $"Previous version file {lastVersionFile} cannot be downloaded ".WriteErrorToConsole();
+                    result = false;
+                }
+            }
+            else
+            {
+                "No previous version detected".WriteInfoToConsole();
+            }
+            return result;
         }
 
         private void ConsoleWriteError(string message)

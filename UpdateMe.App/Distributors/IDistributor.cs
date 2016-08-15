@@ -9,5 +9,9 @@ namespace UpdateMe.App
     public interface IDistributor
     {
         void DistributeRelease(List<string> files);
+
+        void DownloadFile(string source, string destination);
+
+        bool FileExists(string fileName);
     }
 }

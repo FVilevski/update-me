@@ -12,3 +12,5 @@
 /UpdateMe.Updater/bin/Release
 /UpdateMe.Updater/obj/Release
 /UpdateMe.Updater/UpdateMe.Updater.csproj.user
+/UpdateMe.Updater/bin/Debug
+/UpdateMe.Updater/obj/Debug

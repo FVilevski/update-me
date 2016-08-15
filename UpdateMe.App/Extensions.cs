@@ -8,6 +8,12 @@ namespace UpdateMe.App
 {
     internal static class Extensions
     {
+        public const string RELEASE_INFO_FILENAME = "RELEASES";
+        public const string SETUP_EXE_FILENAME = "Setup.exe";
+        public const string SETUP_MSI_FILENAME = "Setup.msi";
+
+        public static string[] FILES_EXCLUDE_LIST = { "*.pdb", "*.vshost*" };
+
         public static void WriteErrorToConsole(this string message)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -37,6 +43,17 @@ namespace UpdateMe.App
         public static int Value(this ResultCodeEnum code)
         {
             return (int)code;
+        }
+
+        public static IEnumerable<string> GetDirectoryFiles(this string directoryPath)
+        {
+            List<string> excludeFiles = new List<string>();
+            foreach (string filter in FILES_EXCLUDE_LIST)
+            {
+                excludeFiles.AddRange(System.IO.Directory.GetFiles(directoryPath, filter));
+            }
+
+            return System.IO.Directory.GetFiles(directoryPath).Except(excludeFiles);
         }
     }
 }

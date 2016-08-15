@@ -43,7 +43,7 @@ namespace UpdateMe.App
                     CannedACL = S3CannedACL.PublicRead,
                     InputStream = fileStream,
                     AutoCloseStream = true,
-                  
+
                 };
                 request.StreamTransferProgress += (sender, e) =>
                 {
@@ -54,6 +54,37 @@ namespace UpdateMe.App
                 _client.PutObject(request);
                 Console.WriteLine();
             }
+        }
+
+        public void DownloadFile(string source, string destination)
+        {
+            try
+            {
+                _client.DownloadToFilePath(_bucketPath, source, destination, null);
+            }
+            catch (Exception ex)
+            {
+                $"Download of file {source} failed, with error message: {ex.Message}".WriteErrorToConsole();
+                throw;
+            }
+        }
+
+        public bool FileExists(string fileName)
+        {
+            GetObjectMetadataResponse response = null;
+            try
+            {
+                response = _client.GetObjectMetadata(_bucketPath, fileName);
+            }
+            catch (AmazonS3Exception ex)
+            {
+                response = null;
+                if (ex.ErrorCode != "NotFound")
+                {
+                    throw;
+                }
+            }
+            return response != null;
         }
     }
 }
