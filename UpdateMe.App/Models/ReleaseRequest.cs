@@ -72,12 +72,23 @@ namespace UpdateMe.App
                 validationErrors.Add("-authors must be valid directory path");
             }
 
+            if (string.IsNullOrWhiteSpace(this.AppIcon))
+            {
+                this.AppIcon = Path.GetFullPath(this.AppIcon);
+                if (File.Exists(this.AppIcon) == false)
+                {
+                    validationErrors.Add("appIcon must be a existing file");
+                }
+            }
+
             if (!string.IsNullOrWhiteSpace(this.SignCertificatePassword) || !string.IsNullOrWhiteSpace(this.SignCertificatePath))
             {
+                this.SignCertificatePath = Path.GetFullPath(this.SignCertificatePath);
                 if (File.Exists(this.SignCertificatePath) == false)
                 {
                     validationErrors.Add("Sign certificate path must be existing file");
                 }
+
 
                 if (string.IsNullOrWhiteSpace(this.SignCertificatePassword))
                 {

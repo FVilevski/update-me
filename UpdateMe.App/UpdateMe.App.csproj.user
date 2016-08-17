@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>-appId=TestA -version=2.0.6 -authors=jp -s="D:\Projects_JP\Intrensic\Version3\trunk\Windows\Intrensic.Windows.Client\bin\Release"  -signCertPass=fyxp5pbYhfR9Mp3zeXDFQRmg -signCertPath="C:\Users\jp\Desktop\IntrensicCodeSign.pfx" -distPath="intrensicapp/NewVersion" -t=TestA</StartArguments>
+    <StartArguments>-appId=TestA -version=2.0.6 -authors=jp -s="D:\Projects_JP\Intrensic\Version3\trunk\Windows\Intrensic.Windows.Client\bin\Release"  -signCertPass=fyxp5pbYhfR9Mp3zeXDFQRmg -signCertPath="D:\Projects_JP\update-me\UpdateMe.App\bin\Debug\Certificates\test\IntrensicCodeSign.pfx" -distPath="intrensicapp/NewVersion" -t=TestA</StartArguments>
   </PropertyGroup>
 </Project>
