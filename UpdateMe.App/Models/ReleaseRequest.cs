@@ -62,6 +62,11 @@ namespace UpdateMe.App
                 validationErrors.Add("appId must be supplied");
             }
 
+            if(!string.IsNullOrWhiteSpace(this.SourceDir))
+            {
+                this.SourceDir = Path.GetFullPath(this.SourceDir);
+            }
+
             if (!Directory.Exists(this.SourceDir))
             {
                 validationErrors.Add("-source must be valid directory path");
@@ -72,7 +77,7 @@ namespace UpdateMe.App
                 validationErrors.Add("-authors must be valid directory path");
             }
 
-            if (string.IsNullOrWhiteSpace(this.AppIcon))
+            if (!string.IsNullOrWhiteSpace(this.AppIcon))
             {
                 this.AppIcon = Path.GetFullPath(this.AppIcon);
                 if (File.Exists(this.AppIcon) == false)
