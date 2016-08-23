@@ -33,6 +33,6 @@ namespace UpdateMe.Updater
         /// <summary>
         /// Closes current application and starts the newest version
         /// </summary>
-        void RestartApplication();
+        void RestartApplication(string arguments = null);
     }
 }

@@ -81,9 +81,9 @@ namespace UpdateMe.Updater
             return hasUpdated;
         }
 
-        public void RestartApplication()
+        public void RestartApplication(string arguments = null)
         {
-            UpdateManager.RestartApp();
+            UpdateManager.RestartApp(arguments);
             this.Dispose();
         }
 
