@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UpdateMe.App
+namespace UpdateMe.App.Distributors
 {
     public class AmazonDistributor : IDistributor
     {
@@ -30,7 +30,7 @@ namespace UpdateMe.App
             $"All files are distributed to AWS bucket {_bucketPath}".WriteSuccessToConsole();
         }
 
-        public void DistributeFile(string sourcePath)
+        public string DistributeFile(string sourcePath)
         {
             using (Stream fileStream = File.OpenRead(sourcePath))
             {
@@ -51,8 +51,10 @@ namespace UpdateMe.App
                     args.PercentDone.WriteProgressToConsole();
 
                 };
-                _client.PutObject(request);
+                PutObjectResponse response = _client.PutObject(request);
                 Console.WriteLine();
+
+                return _client.GeneratePreSignedURL(_bucketPath, Path.GetFileName(sourcePath), DateTime.UtcNow.AddYears(10), null);
             }
         }
 

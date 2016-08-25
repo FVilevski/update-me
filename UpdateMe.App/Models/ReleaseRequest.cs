@@ -23,6 +23,8 @@ namespace UpdateMe.App
 
         public string DistributonPath { get; set; }
 
+        public Models.DistributionTypeEnum DistributonType { get; set; }
+
         public string NugetPackagePath
         {
             get

@@ -4,34 +4,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UpdateMe.App.Distributors;
 
 namespace UpdateMe.App
 {
     class Program
     {
         private static RelaseRequest request = new RelaseRequest();
-        private static string _distributionPath = string.Empty;
 
         static void Main(string[] args)
         {
             try
             {
                 ParseArguments(args);
-
                 if (!request.Validate(true))
                 {
                     Environment.Exit(ResultCodeEnum.ERROR_INPUT.Value());
                     return;
                 }
-
-                IDistributor distributor = GetDistributor(_distributionPath);
+                IDistributor distributor = GetDistributor(request);
                 if (distributor == null)
                 {
                     Environment.Exit(ResultCodeEnum.ERROR_UNEXPECTED.Value());
                     return;
                 }
-
-
                 UpdateBuilder updateBuilder = new UpdateBuilder(distributor);
                 ResultCodeEnum resultCode = updateBuilder.ReleaseNewVersion(request);
                 Environment.Exit(resultCode.Value());
@@ -40,12 +36,25 @@ namespace UpdateMe.App
             {
                 ex.Message.WriteErrorToConsole();
                 Environment.Exit(ResultCodeEnum.ERROR_UNEXPECTED.Value());
-                //todo log exception
             }
-
         }
 
-        private static IDistributor GetDistributor(string distributionPath)
+        static IDistributor GetDistributor(RelaseRequest request)
+        {
+            IDistributor distributor = null;
+            switch (request.DistributonType)
+            {
+                case Models.DistributionTypeEnum.AWS:
+                    distributor = GetAwsDistributor(request.DistributonPath);
+                    break;
+                case Models.DistributionTypeEnum.Local:
+                    distributor = GetLocalDistributor(request.DistributonPath);
+                    break;
+            }
+            return distributor;
+        }
+
+        static IDistributor GetAwsDistributor(string distributionPath)
         {
             IDistributor distributor = null;
             if (string.IsNullOrEmpty(distributionPath))
@@ -82,11 +91,26 @@ namespace UpdateMe.App
 
             Amazon.S3.AmazonS3Client client = new Amazon.S3.AmazonS3Client(awsKey, awsSecret, Amazon.RegionEndpoint.GetBySystemName(region));
 
-            distributor = new AmazonDistributor(_distributionPath, client);
+            distributor = new AmazonDistributor(distributionPath, client);
             return distributor;
         }
 
-        private static void ParseArguments(string[] args)
+        static IDistributor GetLocalDistributor(string distributionPath)
+        {
+            IDistributor distributor = null;
+            if (string.IsNullOrEmpty(distributionPath))
+            {
+                "Distribution path has  to be provided".WriteErrorToConsole();
+                Environment.Exit(ResultCodeEnum.ERROR_INPUT.Value());
+                return distributor;
+            }
+
+
+            distributor = new LocalDistributor(distributionPath);
+            return distributor;
+        }
+
+        static void ParseArguments(string[] args)
         {
             bool show_help = false;
             OptionSet options = new OptionSet()
@@ -128,9 +152,25 @@ namespace UpdateMe.App
                     i => { request.SignCertificatePassword= i; }
                 },
                      {
+                    "dt|distType=",
+                    "aws for amazon distribution, local for distribution on local fileSystem ",
+                    i => {
+                        switch (i.ToLower())
+                            {
+                            case Extensions.DISTRIBUTION_TYPE_LOCAL:
+                                request.DistributonType= Models.DistributionTypeEnum.Local;
+                                break;
+                            case Extensions.DISTRIBUTION_TYPE_AWS:
+                                  default:
+                                request.DistributonType= Models.DistributionTypeEnum.AWS;
+                                break;
+                                }
+                    }
+                },
+                     {
                     "dp|distPath=",
                     "Aws bucket path to with the publish should be send",
-                    i => { _distributionPath = i; }
+                    i => { request.DistributonPath = i; }
                 },
                      { "h|help",  "show this message and exit",
               v => show_help = v != null },

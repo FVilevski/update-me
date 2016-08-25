@@ -7,6 +7,7 @@ using NDesk.Options;
 using System.IO;
 using NuGet;
 using System.Diagnostics;
+using UpdateMe.App.Distributors;
 
 namespace UpdateMe.App
 {
@@ -65,8 +66,12 @@ namespace UpdateMe.App
                 Version = request.Version,
                 Description = request.Title,
                 Title = request.Title,
-                IconUrl = request.AppIcon
             };
+
+            if (File.Exists(request.AppIcon))
+            {
+                metadata.IconUrl = _distributor.DistributeFile(request.AppIcon);
+            }
 
             PackageBuilder builder = new PackageBuilder();
             builder.Populate(metadata);
@@ -106,6 +111,7 @@ namespace UpdateMe.App
             if (File.Exists(request.AppIcon))
             {
                 cmd.AppendFormat(" -setupIcon \"{0}\"", request.AppIcon);
+                cmd.AppendFormat(" -icon \"{0}\"", request.AppIcon);
             }
 
             if (File.Exists(request.SignCertificatePath))
