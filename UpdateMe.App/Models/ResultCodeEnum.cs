@@ -8,8 +8,8 @@ namespace UpdateMe.App
 {
     public enum ResultCodeEnum : int
     {
-        SUCCESS = 1,
-        SUCCESS_HELP = 2,
+        SUCCESS = 0,
+        SUCCESS_HELP = 0,
 
         ERROR_INPUT = -10,
         ERROR_PECONDITION = -11,
