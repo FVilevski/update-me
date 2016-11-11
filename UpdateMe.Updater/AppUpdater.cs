@@ -7,7 +7,7 @@
     using System.Reflection;
     using System.Threading.Tasks;
 
-    public class AppUpdater : IAppUpdater
+    public class AppUpdater : IAppUpdater, IDisposable
     {
         NuGet.SemanticVersion _currentVersion;
         public NuGet.SemanticVersion CurrentVersion
@@ -151,8 +151,8 @@
 
         public void RestartApplication(string arguments = null)
         {
-            UpdateManager.RestartApp(arguments);
             Dispose();
+            UpdateManager.RestartApp(arguments);
         }
 
         public void SetRunOnWindowsStartup(string arguments = null)
@@ -165,9 +165,39 @@
                 null);
         }
 
+        #region Dispose
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _updateManager.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~AppUpdater() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
-            _updateManager.Dispose();
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            //GC.SuppressFinalize(this);
         }
+        #endregion
     }
 }
