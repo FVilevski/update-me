@@ -1,13 +1,12 @@
-﻿using Squirrel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UpdateMe.Updater
+﻿namespace UpdateMe.Updater
 {
+    using Squirrel;
+    using System;
+    using System.Diagnostics;
+    using System.Net;
+    using System.Reflection;
+    using System.Threading.Tasks;
+
     public class AppUpdater : IAppUpdater
     {
         NuGet.SemanticVersion _currentVersion;
@@ -23,11 +22,14 @@ namespace UpdateMe.Updater
             }
         }
 
-        private readonly IUpdateManager _updateManager;
+        readonly IUpdateManager _updateManager;
+
+        UpdateInfo _downloadedUpdateInfo;
 
         public AppUpdater(IUpdateManager updateManager)
         {
             _updateManager = updateManager;
+            _downloadedUpdateInfo = null;
         }
 
         public async Task<bool> HasNewUpdateAsync()
@@ -36,21 +38,29 @@ namespace UpdateMe.Updater
             try
             {
                 UpdateInfo info = await _updateManager.CheckForUpdate();
-
-                hasUpdate = !this.CurrentVersion.Equals(info.FutureReleaseEntry.Version);
-
+                hasUpdate = IsNewVersionAvailable(info);
             }
             catch (System.Net.WebException ex)
             {
                 System.Diagnostics.Trace.WriteLine($"HasNewUpdate failed with web expetion {ex.Message}");
                 hasUpdate = false;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Trace.WriteLine($"HasNewUpdate failed with unexpected error {ex.Message}");
                 hasUpdate = false;
             }
             return hasUpdate;
+        }
+
+        bool IsNewVersionAvailable(UpdateInfo info)
+        {
+            if (info == null)
+            {
+                return false;
+            }
+
+            return !CurrentVersion.Equals(info.FutureReleaseEntry.Version);
         }
 
         public async Task<bool> UpdateAppAsync(bool restartAfterUpdate = true, Action<int> progress = null)
@@ -62,6 +72,7 @@ namespace UpdateMe.Updater
                 {
                     ReleaseEntry info = await _updateManager.UpdateApp(progress);
                     hasUpdated = true;
+
                     if (restartAfterUpdate)
                     {
                         RestartApplication();
@@ -70,7 +81,7 @@ namespace UpdateMe.Updater
             }
             catch (System.Net.WebException ex)
             {
-                System.Diagnostics.Trace.WriteLine($"UpdateApp failed with web expetion {ex.Message}");
+                System.Diagnostics.Trace.WriteLine($"UpdateApp failed with web exception {ex.Message}");
                 hasUpdated = false;
             }
             catch (System.Exception ex)
@@ -81,10 +92,67 @@ namespace UpdateMe.Updater
             return hasUpdated;
         }
 
+        public async Task<bool> GetUpdatesInBackgroundAsync(Action<int> progress = null)
+        {
+            bool hasDownloaded = false;
+
+            try
+            {
+                UpdateInfo info = await _updateManager.CheckForUpdate();
+
+                if (IsNewVersionAvailable(info))
+                {
+                    await _updateManager.DownloadReleases(info.ReleasesToApply, progress);
+                    hasDownloaded = true;
+                    _downloadedUpdateInfo = info;
+                }
+            }
+            catch (WebException ex)
+            {
+                Trace.WriteLine($"GetUpdatesInBackgroundAsync failed with web exception {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"GetUpdatesInBackgroundAsync failed with unexpected error {ex.Message}");
+            }
+
+            return hasDownloaded;
+        }
+
+        public async Task<bool> ApplyDownloadedUpdatesAsync(bool restartAfterUpdate = true, Action<int> progress = null)
+        {
+            bool isUpdated = false;
+
+            try
+            {
+                if (IsNewVersionAvailable(_downloadedUpdateInfo))
+                {
+                    await _updateManager.ApplyReleases(_downloadedUpdateInfo, progress);
+                    isUpdated = true;
+                    _downloadedUpdateInfo = null;
+
+                    if (restartAfterUpdate)
+                    {
+                        RestartApplication(); 
+                    }
+                }
+            }
+            catch (WebException ex)
+            {
+                Trace.WriteLine($"GetUpdatesInBackgroundAsync failed with web exception {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"GetUpdatesInBackgroundAsync failed with unexpected error {ex.Message}");
+            }
+
+            return isUpdated;
+        }
+
         public void RestartApplication(string arguments = null)
         {
             UpdateManager.RestartApp(arguments);
-            this.Dispose();
+            Dispose();
         }
 
         public void SetRunOnWindowsStartup(string arguments = null)
