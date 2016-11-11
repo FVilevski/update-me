@@ -140,10 +140,12 @@
             catch (WebException ex)
             {
                 Trace.WriteLine($"GetUpdatesInBackgroundAsync failed with web exception {ex.Message}");
+                _downloadedUpdateInfo = null;
             }
             catch (Exception ex)
             {
                 Trace.WriteLine($"GetUpdatesInBackgroundAsync failed with unexpected error {ex.Message}");
+                _downloadedUpdateInfo = null;
             }
 
             return isUpdated;
