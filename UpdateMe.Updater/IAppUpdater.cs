@@ -38,7 +38,7 @@
         /// <param name="restartAfterUpdate">If set to true application will restart to the newest version</param>
         /// <param name="progress">Action for updating the update progress</param>
         /// <returns>True if application is updated, false if not updated</returns>
-        Task<bool> ApplyDownloadedUpdatesAsync(bool restartAfterUpdate = true, Action<int> progress = null);
+        Task<bool> ApplyDownloadedUpdatesAsync(bool restartAfterUpdate = true, string restartArguments = null, Action<int> progress = null);
 
         void SetRunOnWindowsStartup(string arguments = null);
 
