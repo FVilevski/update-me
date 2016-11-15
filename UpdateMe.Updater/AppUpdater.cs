@@ -119,7 +119,7 @@
             return hasDownloaded;
         }
 
-        public async Task<bool> ApplyDownloadedUpdatesAsync(bool restartAfterUpdate = true, Action<int> progress = null)
+        public async Task<bool> ApplyDownloadedUpdatesAsync(bool restartAfterUpdate = true, string restartArguments = null, Action<int> progress = null)
         {
             bool isUpdated = false;
 
@@ -133,18 +133,18 @@
 
                     if (restartAfterUpdate)
                     {
-                        RestartApplication(); 
+                        RestartApplication(restartArguments); 
                     }
                 }
             }
             catch (WebException ex)
             {
-                Trace.WriteLine($"GetUpdatesInBackgroundAsync failed with web exception {ex.Message}");
+                Trace.WriteLine($"ApplyDownloadedUpdatesAsync failed with web exception {ex.Message}");
                 _downloadedUpdateInfo = null;
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"GetUpdatesInBackgroundAsync failed with unexpected error {ex.Message}");
+                Trace.WriteLine($"ApplyDownloadedUpdatesAsync failed with unexpected error {ex.Message}");
                 _downloadedUpdateInfo = null;
             }
 
