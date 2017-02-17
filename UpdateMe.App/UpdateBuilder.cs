@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NDesk.Options;
-using System.IO;
-using NuGet;
-using System.Diagnostics;
-using UpdateMe.App.Distributors;
-
-namespace UpdateMe.App
+﻿namespace UpdateMe.App
 {
+    using NuGet;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using UpdateMe.App.Distributors;
+
     public class UpdateBuilder
     {
         private const string DIRECTORY_BASE = "/lib/net45";
