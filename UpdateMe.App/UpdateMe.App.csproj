@@ -152,6 +152,7 @@
     <Content Include="tools\Squirrel.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="tools\StubExecutable.exe" />
     <Content Include="tools\SyncReleases.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
